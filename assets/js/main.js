@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const rows = Array.from(tbody.querySelectorAll('tr'));
         if (rows.length === 0 || rows[0].querySelector('td[colspan]')) return; // empty state
         
-        const rowsPerPage = 10;
+        const rowsPerPage = 5;
         if (rows.length <= rowsPerPage) return;
         
         let currentPage = 1;
@@ -96,6 +96,86 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         
         renderTable(currentPage);
+    });
+
+    // Global Table Search logic
+    const searchInput = document.getElementById('global-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const docTables = document.querySelectorAll('.table-container table');
+            
+            docTables.forEach(table => {
+                const rows = Array.from(table.querySelectorAll('tbody tr'));
+                if (rows.length === 0 || rows[0].querySelector('td[colspan]')) return;
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (term === '') {
+                        row.classList.remove('search-hidden');
+                    } else {
+                        if (text.includes(term)) {
+                            row.classList.remove('search-hidden');
+                            row.style.display = ''; 
+                        } else {
+                            row.classList.add('search-hidden');
+                            row.style.display = 'none';
+                        }
+                    }
+                });
+                
+                // Hide pagination while searching
+                const pagination = table.parentElement.querySelector('.pagination-controls');
+                if (pagination) {
+                    pagination.style.display = term === '' ? 'flex' : 'none';
+                }
+                
+                // Restore pagination when search is cleared
+                if (term === '') {
+                    const activePageBtn = pagination?.querySelector('.page-btn.active');
+                    if (activePageBtn) {
+                        activePageBtn.click(); // Recalculates visibility based on current page
+                    } else {
+                        rows.forEach(r => r.style.display = ''); 
+                    }
+                }
+            });
+        });
+    }
+
+    // Support local table filters specifically (in-page)
+    document.addEventListener('input', (e) => {
+        if (e.target.classList.contains('local-table-filter')) {
+            const tableContainer = e.target.closest('.table-container');
+            const term = e.target.value.toLowerCase();
+            const table = tableContainer.querySelector('table');
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+            const pagination = tableContainer.querySelector('.pagination-controls');
+            
+            if (rows.length === 0 || rows[0].querySelector('td[colspan]')) return;
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (term === '') {
+                    row.style.display = ''; 
+                } else {
+                    if (text.includes(term)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+            
+            if (pagination) {
+                pagination.style.display = term === '' ? 'flex' : 'none';
+            }
+            
+            if (term === '') {
+                 const activePageBtn = pagination?.querySelector('.page-btn.active');
+                 if (activePageBtn) { activePageBtn.click(); }
+            }
+        }
     });
 });
 
@@ -172,7 +252,7 @@ function openEditModal(resource, id, data) {
             
             if (key === 'parent_id') {
                 const parents = await fetch('backend/api.php/parents').then(r => r.json());
-                let options = parents.map(p => `<option value="${p.parent_id}" ${p.parent_id == data[key] ? 'selected' : ''}>${p.full_name}</option>`).join('');
+                let options = parents.map(p => `<option value="${p.parent_id}" ${p.parent_id == data[key] ? 'selected' : ''}>ID: ${p.parent_id} | ${p.full_name}</option>`).join('');
                 formHTML += `<div class="form-group"><label>${label}</label><select id="edit_${key}" class="input-field">${options}</select></div>`;
             } else if (key === 'route_id') {
                 const routes = await fetch('backend/api.php/routes').then(r => r.json());
@@ -180,7 +260,7 @@ function openEditModal(resource, id, data) {
                 formHTML += `<div class="form-group"><label>${label}</label><select id="edit_${key}" class="input-field">${options}</select></div>`;
             } else if (key === 'student_id') {
                 const students = await fetch('backend/api.php/students').then(r => r.json());
-                let options = students.map(s => `<option value="${s.id}" ${s.id == data[key] ? 'selected' : ''}>${s.fullname}</option>`).join('');
+                let options = students.map(s => `<option value="${s.id}" ${s.id == data[key] ? 'selected' : ''}>ID: ${s.id} | ${s.fullname}</option>`).join('');
                 formHTML += `<div class="form-group"><label>${label}</label><select id="edit_${key}" class="input-field">${options}</select></div>`;
             } else if (key === 'uses_transport') {
                 formHTML += `
@@ -268,11 +348,14 @@ function openAddModal(resource, fields) {
     const buildAddBody = async () => {
         let formHTML = '';
         for (const field of fields) {
-            const label = field.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            let label = field.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            if (field === 'enrollment_id') label = 'Student & Assigned Route';
+            if (field === 'amount') label = 'Amount Paid';
+            if (field === 'payment_date') label = 'Date Paid';
             
             if (field === 'parent_id') {
                 const parents = await fetch('backend/api.php/parents').then(r => r.json());
-                let options = parents.map(p => `<option value="${p.parent_id}">${p.full_name}</option>`).join('');
+                let options = parents.map(p => `<option value="${p.parent_id}">ID: ${p.parent_id} | ${p.full_name}</option>`).join('');
                 formHTML += `<div class="form-group"><label>${label}</label><select id="add_${field}" class="input-field">${options}</select></div>`;
             } else if (field === 'route_id') {
                 const routes = await fetch('backend/api.php/routes').then(r => r.json());
@@ -280,8 +363,53 @@ function openAddModal(resource, fields) {
                 formHTML += `<div class="form-group"><label>${label}</label><select id="add_${field}" class="input-field">${options}</select></div>`;
             } else if (field === 'student_id') {
                 const students = await fetch('backend/api.php/students').then(r => r.json());
-                let options = students.map(s => `<option value="${s.id}">${s.fullname}</option>`).join('');
+                let options = students.map(s => `<option value="${s.id}">ID: ${s.id} | ${s.fullname}</option>`).join('');
                 formHTML += `<div class="form-group"><label>${label}</label><select id="add_${field}" class="input-field">${options}</select></div>`;
+            } else if (field === 'enrollment_id') {
+                const enrollments = await fetch('backend/api.php/enrollments').then(r => r.json());
+                window.paymentEnrollments = enrollments;
+                
+                const studentOpts = [...new Map(enrollments.map(e => [e.student_id, e])).values()].map(e => `<option value="${e.student_id}">${e.student_name}</option>`).join('');
+                
+                formHTML += `
+                    <div class="form-group">
+                        <label>Student Select</label>
+                        <select id="payment_student_select" class="input-field" onchange="
+                            const sid = this.value;
+                            const routeSelect = document.getElementById('payment_route_select');
+                            const related = window.paymentEnrollments.filter(e => e.student_id == sid);
+                            routeSelect.innerHTML = '<option value=\\'\\'>Select Route...</option>' + related.map(e => \`<option value='\${e.id}' data-fee='\${e.monthly_fee}'>\${e.route_name}</option>\`).join('');
+                            routeSelect.value = '';
+                            document.getElementById('add_enrollment_id').value = '';
+                            if(related.length === 1) {
+                                routeSelect.value = related[0].id;
+                                routeSelect.dispatchEvent(new Event('change'));
+                            }
+                        ">
+                            <option value="">Choose Student...</option>
+                            ${studentOpts}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Route Name Select</label>
+                        <select id="payment_route_select" class="input-field" onchange="
+                            const selected = this.options[this.selectedIndex];
+                            const fee = selected ? selected.getAttribute('data-fee') : null;
+                            const enrollmentId = this.value;
+                            document.getElementById('add_enrollment_id').value = enrollmentId;
+                            
+                            const amountInput = document.getElementById('add_amount');
+                            if(amountInput && fee) {
+                                amountInput.value = fee;
+                                amountInput.style.borderColor = 'var(--primary)';
+                                setTimeout(() => amountInput.style.borderColor = '', 1000);
+                            }
+                        ">
+                            <option value="">Select Student First...</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="add_enrollment_id" value="">
+                `;
             } else if (field === 'payment_method') {
                 formHTML += `
                     <div class="form-group">
@@ -310,6 +438,29 @@ function openAddModal(resource, fields) {
                             <option value="1">Yes</option>
                             <option value="0">No</option>
                         </select>
+                    </div>
+                `;
+            } else if (field === 'students') {
+                formHTML += `
+                    <div class="form-group">
+                        <label>Students (Optional)</label>
+                        <input type="text" id="add_${field}" placeholder="e.g. John Doe, Jane Doe (comma-separated)" class="input-field">
+                    </div>
+                `;
+            } else if (field === 'total_pupils') {
+                formHTML += `
+                    <div class="form-group">
+                        <label>Total Pupils</label>
+                        <input type="text" id="add_${field}" value="0" class="input-field" disabled style="background:#f8fafc; color:#94a3b8; border-style:dashed;">
+                        <small style="color:#94a3b8; font-size:10px;">Updates automatically when students enroll</small>
+                    </div>
+                `;
+            } else if (field === 'revenue_potential') {
+                formHTML += `
+                    <div class="form-group">
+                        <label>Revenue Potential</label>
+                        <input type="text" id="add_${field}" value="0 RWF" class="input-field" disabled style="background:#f8fafc; color:#94a3b8; border-style:dashed;">
+                        <small style="color:#94a3b8; font-size:10px;">Calculated automatically based on enrollments</small>
                     </div>
                 `;
             } else {

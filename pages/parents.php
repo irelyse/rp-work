@@ -18,7 +18,13 @@ $parents = $pdo->query($sql)->fetchAll();
 </div>
 
 <div class="table-container">
-    <div class="table-title">Registered Parents</div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div class="table-title">Parents Management</div>
+        <div style="position: relative;">
+            <input type="text" placeholder="Search by name, phone..." class="local-table-filter" style="padding: 10px 15px 10px 35px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.85rem; width: 220px; outline: none; transition: all 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e2e8f0'">
+            <i data-lucide="search" size="16" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+        </div>
+    </div>
     <table>
         <thead>
             <tr>

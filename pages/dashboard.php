@@ -2,14 +2,18 @@
 require_once 'backend/db.php';
 
 // Fetch stats from database
-$totalStudents = (int)$pdo->query("SELECT COUNT(*) FROM students WHERE uses_transport = 1")->fetchColumn();
+$totalStudents = (int)$pdo->query("SELECT COUNT(*) FROM students")->fetchColumn();
+$transportStudents = (int)$pdo->query("SELECT COUNT(*) FROM students WHERE uses_transport = 1")->fetchColumn();
 $totalRoutes = (int)$pdo->query("SELECT COUNT(*) FROM bus_routes")->fetchColumn();
+$activeRoutes = (int)$pdo->query("SELECT COUNT(DISTINCT route_id) FROM transport_enrollments")->fetchColumn();
 $totalPayments = (float)$pdo->query("SELECT SUM(amount_paid) FROM transport_enrollments")->fetchColumn() ?: 0;
 $outstandingBalance = (float)$pdo->query("SELECT SUM(r.monthly_fee - te.amount_paid) FROM transport_enrollments te JOIN bus_routes r ON te.route_id = r.id")->fetchColumn() ?: 0;
 
 $stats = [
     'total_students' => $totalStudents,
+    'transport_students' => $transportStudents,
     'total_routes' => $totalRoutes,
+    'active_routes' => $activeRoutes,
     'total_payments' => $totalPayments,
     'outstanding_balance' => $outstandingBalance
 ];
@@ -37,9 +41,15 @@ $recentPayments = $pdo->query($sql)->fetchAll();
             </span>
             <i data-lucide="more-vertical" size="16"></i>
         </div>
-        <div class="stat-value">
-            <?php echo $stats['total_students']; ?>
-            <span style="font-size: 0.75rem; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 20px; margin-left: auto;">+2.4%</span>
+        <div class="stat-value" style="display: flex; flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; width: 100%; align-items: center;">
+                <?php echo $stats['total_students']; ?>
+                <span style="font-size: 0.75rem; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 20px; margin-left: auto;">All</span>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--text-dim); margin-top: 8px; font-weight: 500;">
+                <i data-lucide="bus" size="14" style="vertical-align: middle; margin-right: 4px;"></i>
+                <?php echo $stats['transport_students']; ?> have transport
+            </span>
         </div>
     </div>
 
@@ -49,13 +59,19 @@ $recentPayments = $pdo->query($sql)->fetchAll();
                 <div style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 10px;">
                     <i data-lucide="map" size="18" color="#8b5cf6"></i>
                 </div>
-                Active Routes
+                Total Routes
             </span>
             <i data-lucide="more-vertical" size="16"></i>
         </div>
-        <div class="stat-value">
-            <?php echo $stats['total_routes']; ?>
-            <span style="font-size: 0.75rem; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 20px; margin-left: auto;">Stable</span>
+        <div class="stat-value" style="display: flex; flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; width: 100%; align-items: center;">
+                <?php echo $stats['total_routes']; ?>
+                <span style="font-size: 0.75rem; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 20px; margin-left: auto;">Total</span>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--text-dim); margin-top: 8px; font-weight: 500;">
+                <i data-lucide="navigation" size="14" style="vertical-align: middle; margin-right: 4px;"></i>
+                <?php echo $stats['active_routes']; ?> active (with students)
+            </span>
         </div>
     </div>
 
@@ -69,10 +85,12 @@ $recentPayments = $pdo->query($sql)->fetchAll();
             </span>
             <i data-lucide="more-vertical" size="16"></i>
         </div>
-        <div class="stat-value">
-            <span style="font-size: 1.2rem; margin-right: 5px;">RWF</span>
-            <?php echo number_format($stats['total_payments']); ?>
-            <span style="font-size: 0.75rem; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 20px; margin-left: auto;">+12.8%</span>
+        <div class="stat-value" style="display: flex; flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; width: 100%; align-items: center;">
+                <span style="font-size: 1.2rem; margin-right: 5px; color: var(--text-dim);">RWF</span>
+                <?php echo number_format($stats['total_payments']); ?>
+                <span style="font-size: 0.75rem; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 20px; margin-left: auto;">+12.8%</span>
+            </div>
         </div>
     </div>
 
@@ -86,10 +104,12 @@ $recentPayments = $pdo->query($sql)->fetchAll();
             </span>
             <i data-lucide="more-vertical" size="16"></i>
         </div>
-        <div class="stat-value" style="color: #ef4444;">
-            <span style="font-size: 1.2rem; margin-right: 5px;">RWF</span>
-            <?php echo number_format($stats['outstanding_balance']); ?>
-            <span style="font-size: 0.75rem; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 4px 8px; border-radius: 20px; margin-left: auto;">Action Req</span>
+        <div class="stat-value" style="display: flex; flex-direction: column; align-items: flex-start; color: #ef4444;">
+            <div style="display: flex; width: 100%; align-items: center;">
+                <span style="font-size: 1.2rem; margin-right: 5px; color: var(--text-dim);">RWF</span>
+                <?php echo number_format($stats['outstanding_balance']); ?>
+                <span style="font-size: 0.75rem; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 4px 8px; border-radius: 20px; margin-left: auto;">Action Req</span>
+            </div>
         </div>
     </div>
 </div>

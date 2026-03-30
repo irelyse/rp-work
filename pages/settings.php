@@ -38,6 +38,20 @@
                 </div>
             </div>
 
+            <div style="background: #fef2f2; padding: 20px; border-radius: 12px; border: 1px solid #fee2e2;">
+                <h3 style="margin-bottom: 5px; display: flex; align-items: center; gap: 10px; color: #b91c1c;">
+                    <i data-lucide="trash-2" size="18"></i>
+                    Clear All Data
+                </h3>
+                <p style="font-size: 0.8rem; color: #991b1b; margin-bottom: 20px;">Warning: This will permanently delete all Students, Parents, Routes, and Payments. This action cannot be undone.</p>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn btn-danger" id="btn-clear-db" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; padding: 12px; border-radius: 10px; font-weight: bold; background: #ef4444; color: white;">
+                        <i data-lucide="alert-triangle" size="18"></i>
+                        Clear Every Single Entry
+                    </button>
+                </div>
+            </div>
+
             <button class="btn btn-primary" onclick="alert('Settings changes saved.')" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; padding: 12px;">
                 <i data-lucide="save" size="18"></i>
                 Save Configuration Changes
@@ -47,6 +61,25 @@
 </div>
 
 <script>
+    document.getElementById('btn-clear-db')?.addEventListener('click', async () => {
+        if (!confirm('EXTREME WARNING: Are you sure you want to delete ALL data from the database? This includes all Students, Parents, Routes, and Payments history. This action cannot be reversed!')) return;
+        
+        if (!confirm('FINAL CONFIRMATION: You are about to wipe your database clean. Proceed?')) return;
+
+        try {
+            const res = await fetch('backend/clear_data.php');
+            const result = await res.json();
+            if (result.success) {
+                alert(result.message);
+                window.location.href = '?page=dashboard';
+            } else {
+                alert('Error: ' + (result.error || 'Unknown error'));
+            }
+        } catch (e) {
+            alert('Failed to execute command. Please check server logs.');
+        }
+    });
+
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }

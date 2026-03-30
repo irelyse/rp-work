@@ -192,10 +192,83 @@
         .feature-card h3 { font-size: 1.5rem; margin-bottom: 16px; color: var(--secondary); }
         .feature-card p { color: var(--text-dim); line-height: 1.6; }
 
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .contact-box {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-light);
+            padding: 50px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            padding: 8px;
+            z-index: 1001;
+        }
+
+        .mobile-nav {
+            position: fixed;
+            top: 0; right: -100%;
+            width: 80%; height: 100vh;
+            background: #fff;
+            z-index: 1000;
+            padding: 100px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+        }
+
+        .mobile-nav.active { right: 0; }
+
+        .mobile-nav a {
+            text-decoration: none;
+            color: var(--secondary);
+            font-size: 1.25rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .mobile-nav .btn-portal {
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
         @media (max-width: 900px) {
             .hero h1 { font-size: 3rem; }
             .feature-grid { grid-template-columns: 1fr; }
             .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            .form-row { grid-template-columns: 1fr; gap: 16px; }
+            .contact-box { padding: 30px 20px; border-radius: 16px; }
         }
     </style>
 </head>
@@ -213,8 +286,19 @@
                 <a href="#contact">Contact Support</a>
                 <a href="login.php" class="btn-portal">Administrator Portal</a>
             </div>
+            <button class="mobile-menu-btn" id="mobile-toggle">
+                <i data-lucide="menu" size="28"></i>
+            </button>
         </div>
     </header>
+
+    <div class="overlay" id="nav-overlay"></div>
+    <nav class="mobile-nav" id="mobile-menu">
+        <a href="#features" class="mob-link">Features</a>
+        <a href="#about" class="mob-link">About Us</a>
+        <a href="#contact" class="mob-link">Contact Support</a>
+        <a href="login.php" class="btn-portal">Administrator Portal</a>
+    </nav>
 
     <section class="hero">
         <div class="container hero-content">
@@ -253,16 +337,174 @@
         </div>
     </section>
 
-    <footer style="background: var(--secondary); color: white; padding: 60px 0; text-align: center;">
+    <section id="about" style="padding: 100px 0; background: #fff; border-top: 1px solid rgba(0,0,0,0.05);">
+        <div class="container" style="display: flex; flex-wrap: wrap; align-items: center; gap: 60px;">
+            <div style="flex: 1; min-width: 300px;">
+                <div style="display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 100px; background: rgba(230, 49, 151, 0.1); color: var(--primary); font-weight: 600; font-size: 0.9rem; margin-bottom: 20px;">
+                    <i data-lucide="info" size="18"></i> About Us
+                </div>
+                <h2 style="font-size: 3rem; color: var(--secondary); margin-bottom: 24px; line-height: 1.1; letter-spacing: -1px;">Empowering Education Through Seamless Transport</h2>
+                <p style="color: var(--text-dim); font-size: 1.1rem; line-height: 1.8; margin-bottom: 24px;">
+                    Classic Academy is dedicated to providing an unparalleled educational experience, and that extends to how our students commute. We believe that a safe, reliable, and well-managed transport system is foundational to student success.
+                </p>
+                <p style="color: var(--text-dim); font-size: 1.1rem; line-height: 1.8; margin-bottom: 32px;">
+                    Our comprehensive transport management system bridges the gap between administrators, drivers, and parents, ensuring real-time coordination, transparent billing, and absolute peace of mind for our community in the Ntarabana sector and beyond.
+                </p>
+                <div style="display: flex; gap: 32px;">
+                    <div>
+                        <h4 style="font-size: 2.5rem; color: var(--primary); margin-bottom: 4px; font-weight: 800;">100%</h4>
+                        <p style="color: var(--text-dim); font-size: 0.95rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Safety Record</p>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 2.5rem; color: var(--primary); margin-bottom: 4px; font-weight: 800;">24/7</h4>
+                        <p style="color: var(--text-dim); font-size: 0.95rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Admin Support</p>
+                    </div>
+                </div>
+            </div>
+            <div style="flex: 1; min-width: 300px; position: relative;">
+                <div style="position: absolute; inset: 0; background: radial-gradient(circle, rgba(230,49,151,0.15) 0%, transparent 70%); transform: scale(1.3); z-index: 0;"></div>
+                <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2069&auto=format&fit=crop" alt="Classic Academy Transport" style="width: 100%; border-radius: 32px; box-shadow: 0 20px 40px rgba(15,23,42,0.1); position: relative; z-index: 1; border: 1px solid rgba(0,0,0,0.05);">
+                <div style="position: absolute; bottom: -20px; right: -20px; background: white; padding: 24px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); z-index: 2; display: flex; align-items: center; gap: 16px; border: 1px solid rgba(0,0,0,0.05);">
+                    <div style="width: 56px; height: 56px; background: var(--primary); color: white; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(230, 49, 151, 0.3);">
+                        <i data-lucide="shield-check" size="28"></i>
+                    </div>
+                    <div>
+                        <p style="font-weight: 700; color: var(--secondary); font-size: 1.2rem;">Trusted By</p>
+                        <p style="color: var(--text-dim); font-size: 0.95rem; font-weight: 500;">500+ Parents</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" style="padding: 100px 0; background: var(--bg-light);">
         <div class="container">
-            <div style="opacity: 0.6; font-size: 0.9rem;">
-                &copy; 2026 Classic Academy Transportation. Designed for secure and sustainable schooling.
+            <div style="text-align: center; max-width: 600px; margin: 0 auto; margin-bottom: 60px;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 16px; background: rgba(230, 49, 151, 0.1); color: var(--primary); margin-bottom: 24px;">
+                    <i data-lucide="headset" size="28"></i>
+                </div>
+                <h2 style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 16px;">Contact Support</h2>
+                <p style="color: var(--text-dim); font-size: 1.1rem;">Need assistance with routes or payments? Reach out to our dedicated support team today.</p>
+            </div>
+            <div class="contact-box">
+                <form action="#" method="POST" style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="form-row">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 500; color: var(--secondary); font-size: 0.95rem;">Full Name</label>
+                            <input type="text" placeholder="John Doe" style="padding: 16px; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; width: 100%; font-family: inherit; font-size: 1rem; transition: all 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#E2E8F0'">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 500; color: var(--secondary); font-size: 0.95rem;">Email Address</label>
+                            <input type="email" placeholder="john@example.com" style="padding: 16px; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; width: 100%; font-family: inherit; font-size: 1rem; transition: all 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#E2E8F0'">
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-weight: 500; color: var(--secondary); font-size: 0.95rem;">Subject</label>
+                        <select style="padding: 16px; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; width: 100%; font-family: inherit; color: var(--text-main); font-size: 1rem; background: #fff; cursor: pointer; transition: all 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#E2E8F0'">
+                            <option>Route Update Request</option>
+                            <option>Payment Issue</option>
+                            <option>Student Information Update</option>
+                            <option>General Inquiry</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-weight: 500; color: var(--secondary); font-size: 0.95rem;">Message</label>
+                        <textarea rows="5" placeholder="How can we help you?" style="padding: 16px; border-radius: 12px; border: 1px solid #E2E8F0; outline: none; width: 100%; font-family: inherit; font-size: 1rem; resize: vertical; transition: all 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#E2E8F0'"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="justify-content: center; border: none; cursor: pointer; font-family: inherit; margin-top: 8px;">
+                        Send Message <i data-lucide="send" size="20"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Premium Footer Rebranded for Classic Academy -->
+    <footer style="background: #0F172A; color: white; padding: 100px 0 60px; position: relative; overflow: hidden;">
+        <!-- Large Background Text (Classic Academy Brand) with Animations -->
+        <div class="bg-float-text" style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 15rem; font-weight: 900; color: rgba(230, 49, 151, 0.04); white-space: nowrap; pointer-events: none; user-select: none; font-family: 'Outfit', sans-serif; letter-spacing: -5px; animation: floatDrift 20s ease-in-out infinite;">
+            CLASSIC
+        </div>
+        <div class="bg-float-text" style="position: absolute; bottom: 0px; left: 50%; transform: translateX(-50%); font-size: 12rem; font-weight: 900; color: rgba(230, 49, 151, 0.06); white-space: nowrap; pointer-events: none; user-select: none; font-family: 'Outfit', sans-serif; opacity: 0.5; letter-spacing: -3px; animation: floatDrift 25s ease-in-out infinite reverse;">
+            ACADEMY
+        </div>
+
+        <div class="container" style="position: relative; z-index: 2;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 40px;">
+                <div style="max-width: 550px; text-align: left;">
+                    <h2 style="font-size: 3.5rem; line-height: 1.1; margin-bottom: 24px; font-weight: 700; font-family: 'Outfit', sans-serif;">
+                        Let's build something <br>
+                        <span style="color: #E63197;">extraordinary.</span>
+                    </h2>
+                    <div style="display: flex; gap: 24px; margin-top: 30px;">
+                        <a href="#about" style="color: #94A3B8; text-decoration: none; font-weight: 500; font-size: 1rem; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#94A3B8'">About Us</a>
+                        <a href="#features" style="color: #94A3B8; text-decoration: none; font-weight: 500; font-size: 1rem; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#94A3B8'">Features</a>
+                        <a href="#contact" style="color: #94A3B8; text-decoration: none; font-weight: 500; font-size: 1rem; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#94A3B8'">Support</a>
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <a href="login.php" class="btn-connect" style="display: inline-block; background: #E63197; color: white; padding: 18px 40px; border-radius: 100px; text-decoration: none; font-weight: 600; font-size: 1.1rem; box-shadow: 0 10px 30px rgba(230, 49, 151, 0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-family: 'Inter', sans-serif;">
+                        Access Admin Portal
+                    </a>
+                    <div style="margin-top: 30px; color: rgba(255,255,255,0.4); font-size: 0.9rem; font-weight: 400;">
+                        &copy; <?php echo date('Y'); ?> Classic Academy Transportation. All rights reserved.
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
 
+    <style>
+        @keyframes floatDrift {
+            0%, 100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+            33% { transform: translateX(-48%) translateY(-15px) rotate(1deg); }
+            66% { transform: translateX(-52%) translateY(10px) rotate(-1deg); }
+        }
+        .bg-float-text {
+            will-change: transform;
+        }
+        .btn-connect:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 20px 40px rgba(230, 49, 151, 0.4);
+            background: #FF80C5;
+        }
+        @media (max-width: 768px) {
+            footer h2 { font-size: 2.5rem; text-align: center; }
+            footer { text-align: center; }
+            footer div[style*="text-align: right"] { text-align: center; width: 100%; }
+            footer div[style*="text-align: left"] { text-align: center; width: 100%; }
+            footer div[style*="justify-content: space-between"] { justify-content: center; }
+            footer div[style*="font-size: 15rem"] { font-size: 8rem; }
+            footer div[style*="font-size: 12rem"] { font-size: 6rem; }
+            footer .container div[style*="display: flex; gap: 24px"] { justify-content: center; }
+        }
+    </style>
+
     <script>
         lucide.createIcons();
+
+        // Mobile Menu Toggle Logic
+        const toggleBtn = document.getElementById('mobile-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('nav-overlay');
+        const links = document.querySelectorAll('.mob-link');
+
+        const toggleMenu = () => {
+            mobileMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            const icon = toggleBtn.querySelector('i');
+            if(mobileMenu.classList.contains('active')) {
+                toggleBtn.innerHTML = '<i data-lucide="x" size="28"></i>';
+            } else {
+                toggleBtn.innerHTML = '<i data-lucide="menu" size="28"></i>';
+            }
+            lucide.createIcons();
+        };
+
+        toggleBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+        links.forEach(link => link.addEventListener('click', toggleMenu));
     </script>
 </body>
 </html>

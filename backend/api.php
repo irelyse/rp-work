@@ -36,10 +36,30 @@ function error($message, $status = 400) {
 switch ($resource) {
     case 'parents':
         if ($requestMethod === 'POST') {
-            $sql = 'INSERT INTO parents (full_name, phone, email, address) VALUES (?, ?, ?, ?)';
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$input['full_name'], $input['phone'], $input['email'], $input['address']]);
-            respond(['id' => $pdo->lastInsertId(), 'message' => 'Parent registered successfully'], 201);
+            $pdo->beginTransaction();
+            try {
+                $sql = 'INSERT INTO parents (full_name, phone, email, address) VALUES (?, ?, ?, ?)';
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$input['full_name'] ?? '', $input['phone'] ?? '', $input['email'] ?? '', $input['address'] ?? '']);
+                $parentId = $pdo->lastInsertId();
+                
+                if (!empty($input['students'])) {
+                    $studentNames = explode(',', $input['students']);
+                    $stmtStudent = $pdo->prepare('INSERT INTO students (fullname, parent_id) VALUES (?, ?)');
+                    foreach ($studentNames as $name) {
+                        $name = trim($name);
+                        if (!empty($name)) {
+                            $stmtStudent->execute([$name, $parentId]);
+                        }
+                    }
+                }
+                
+                $pdo->commit();
+                respond(['id' => $parentId, 'message' => 'Parent registered successfully'], 201);
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                error($e->getMessage());
+            }
         } elseif ($requestMethod === 'GET') {
             if ($id) {
                 $stmt = $pdo->prepare('SELECT * FROM parents WHERE parent_id = ?');
@@ -122,7 +142,7 @@ switch ($resource) {
             $stmt->execute([$input['student_id'], $input['route_id'], $input['term'], 'Pending']);
             respond(['id' => $pdo->lastInsertId(), 'message' => 'Student enrolled in route'], 201);
         } elseif ($requestMethod === 'GET') {
-            $sql = 'SELECT te.*, s.fullname as student_name, r.route_name, r.monthly_fee FROM transport_enrollments te JOIN students s ON te.student_id = s.id JOIN bus_routes r ON te.route_id = r.id';
+            $sql = 'SELECT te.*, s.parent_id, s.fullname as student_name, p.full_name as parent_name, r.route_name, r.monthly_fee FROM transport_enrollments te JOIN students s ON te.student_id = s.id LEFT JOIN parents p ON s.parent_id = p.parent_id JOIN bus_routes r ON te.route_id = r.id';
             $stmt = $pdo->query($sql);
             respond($stmt->fetchAll());
         } elseif ($requestMethod === 'PUT') {
@@ -182,8 +202,10 @@ switch ($resource) {
     case 'dashboard':
         if ($parts[1] === 'stats') {
             $stats = [];
-            $stats['total_students'] = (int)$pdo->query('SELECT COUNT(*) FROM students WHERE uses_transport = 1')->fetchColumn();
+            $stats['total_students'] = (int)$pdo->query('SELECT COUNT(*) FROM students')->fetchColumn();
+            $stats['transport_students'] = (int)$pdo->query('SELECT COUNT(*) FROM students WHERE uses_transport = 1')->fetchColumn();
             $stats['total_routes'] = (int)$pdo->query('SELECT COUNT(*) FROM bus_routes')->fetchColumn();
+            $stats['active_routes'] = (int)$pdo->query('SELECT COUNT(DISTINCT route_id) FROM transport_enrollments')->fetchColumn();
             $stats['total_payments'] = (float)$pdo->query('SELECT SUM(amount_paid) FROM transport_enrollments')->fetchColumn() ?: 0;
             $stats['outstanding_balance'] = (float)$pdo->query('SELECT SUM(r.monthly_fee - te.amount_paid) FROM transport_enrollments te JOIN bus_routes r ON te.route_id = r.id')->fetchColumn() ?: 0;
             respond($stats);

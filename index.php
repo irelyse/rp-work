@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 
 // Sanitization to prevent directory traversal
-$allowedPages = ['dashboard', 'students', 'parents', 'routes', 'payments', 'enrollments', 'settings'];
+$allowedPages = ['dashboard', 'students', 'parents', 'routes', 'payments', 'enrollments', 'settings', 'reports'];
 if (!in_array($page, $allowedPages)) {
     $page = 'dashboard';
 }

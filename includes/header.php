@@ -8,10 +8,11 @@ $pageNames = [
     'dashboard' => 'Dashboard',
     'students' => 'Students Management',
     'parents' => 'Parents Management',
-    'routes' => 'Bus Routes',
+    'routes' => 'Routes',
     'payments' => 'Payments',
     'enrollments' => 'Enrollments',
-    'settings' => 'Settings'
+    'settings' => 'Settings',
+    'reports' => 'Reports Center'
 ];
 $currentPageName = isset($pageNames[$page]) ? $pageNames[$page] : 'Classic Academy';
 ?>
