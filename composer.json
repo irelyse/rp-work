@@ -1,0 +1,9 @@
+{
+    "name": "classic-academy/transport-system",
+    "description": "School Transportation Fees Management System",
+    "type": "project",
+    "require": {
+        "php": ">=7.4"
+    },
+    "license": "MIT"
+}
