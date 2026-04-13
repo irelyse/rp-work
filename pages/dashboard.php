@@ -8,6 +8,8 @@ $totalRoutes = (int)$pdo->query("SELECT COUNT(*) FROM bus_routes")->fetchColumn(
 $activeRoutes = (int)$pdo->query("SELECT COUNT(DISTINCT route_id) FROM transport_enrollments")->fetchColumn();
 $totalPayments = (float)$pdo->query("SELECT SUM(amount_paid) FROM transport_enrollments")->fetchColumn() ?: 0;
 $outstandingBalance = (float)$pdo->query("SELECT SUM(r.monthly_fee - te.amount_paid) FROM transport_enrollments te JOIN bus_routes r ON te.route_id = r.id")->fetchColumn() ?: 0;
+$newMessages = (int)$pdo->query("SELECT COUNT(*) FROM support_messages WHERE status = 'New'")->fetchColumn();
+$totalReports = (int)$pdo->query("SELECT COUNT(*) FROM payments")->fetchColumn();
 
 $stats = [
     'total_students' => $totalStudents,
@@ -15,7 +17,9 @@ $stats = [
     'total_routes' => $totalRoutes,
     'active_routes' => $activeRoutes,
     'total_payments' => $totalPayments,
-    'outstanding_balance' => $outstandingBalance
+    'outstanding_balance' => $outstandingBalance,
+    'new_messages' => $newMessages,
+    'total_reports' => $totalReports
 ];
 
 // Fetch recent payments (enrollments with their related info)
@@ -110,6 +114,45 @@ $recentPayments = $pdo->query($sql)->fetchAll();
                 <?php echo number_format($stats['outstanding_balance']); ?>
                 <span style="font-size: 0.75rem; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 4px 8px; border-radius: 20px; margin-left: auto;">Action Req</span>
             </div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            <span style="display: flex; align-items: center; gap: 8px;">
+                <div style="background: rgba(230, 49, 151, 0.1); padding: 8px; border-radius: 10px;">
+                    <i data-lucide="mail" size="18" color="#E63197"></i>
+                </div>
+                Support Messages
+            </span>
+            <i data-lucide="more-vertical" size="16"></i>
+        </div>
+        <div class="stat-value" style="display: flex; flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; width: 100%; align-items: center;">
+                <?php echo $stats['new_messages']; ?>
+                <span style="font-size: 0.75rem; color: <?php echo $stats['new_messages'] > 0 ? '#ef4444' : '#10b981'; ?>; background: <?php echo $stats['new_messages'] > 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)'; ?>; padding: 4px 8px; border-radius: 20px; margin-left: auto;">
+                    <?php echo $stats['new_messages'] > 0 ? 'New Arrivals' : 'No New'; ?>
+                </span>
+            </div>
+            <a href="?page=admin_support" style="text-decoration: none; font-size: 0.85rem; color: var(--primary); margin-top: 8px; font-weight: 600;">View Inbox &rarr;</a>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">
+            <span style="display: flex; align-items: center; gap: 8px;">
+                <div style="background: rgba(59, 130, 246, 0.1); padding: 8px; border-radius: 10px;">
+                    <i data-lucide="file-text" size="18" color="#3b82f6"></i>
+                </div>
+                Payment Reports
+            </span>
+            <i data-lucide="more-vertical" size="16"></i>
+        </div>
+        <div class="stat-value" style="display: flex; flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; width: 100%; align-items: center;">
+                <?php echo $stats['total_reports']; ?>
+                <span style="font-size: 0.75rem; color: #3b82f6; background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 20px; margin-left: auto;">Generated</span>
+            </div>
+            <a href="?page=reports" style="text-decoration: none; font-size: 0.85rem; color: #3b82f6; margin-top: 8px; font-weight: 600;">Open Center &rarr;</a>
         </div>
     </div>
 </div>

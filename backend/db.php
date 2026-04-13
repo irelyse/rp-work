@@ -59,6 +59,16 @@ try {
         full_name VARCHAR(100)
     )");
 
+    $pdo->exec("CREATE TABLE IF NOT EXISTS support_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fullname VARCHAR(150),
+        email VARCHAR(100),
+        subject VARCHAR(150),
+        message TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status VARCHAR(20) DEFAULT 'New'
+    )");
+
     // Add default admin user if it doesn't exist (password is 'admin123')
     $checkUser = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = 'admin'");
     $checkUser->execute();

@@ -12,7 +12,9 @@ $pageNames = [
     'payments' => 'Payments',
     'enrollments' => 'Enrollments',
     'settings' => 'Settings',
-    'reports' => 'Reports Center'
+    'reports' => 'Reports Center',
+    'support' => 'Contact Support',
+    'admin_support' => 'Support Messages'
 ];
 $currentPageName = isset($pageNames[$page]) ? $pageNames[$page] : 'Classic Academy';
 ?>

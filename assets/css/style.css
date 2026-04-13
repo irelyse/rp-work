@@ -766,3 +766,137 @@ select:focus {
   background: var(--accent);
   color: #041021;
 }
+
+/* --- Mobile Responsiveness --- */
+
+/* Mobile Menu Button - Hidden by default */
+.mobile-nav-toggle {
+    display: none;
+    background: #F3F4F6;
+    border: none;
+    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--text-main);
+    transition: all 0.3s;
+}
+
+@media (max-width: 1024px) {
+    .top-links {
+        display: none; /* Hide standard links to use mobile menu */
+    }
+    
+    .mobile-nav-toggle {
+        display: flex;
+    }
+
+    .main-content {
+        padding: 24px 20px;
+    }
+
+    .top-nav {
+        border-radius: 20px;
+        padding: 12px 16px;
+    }
+
+    .nav-search {
+        display: none; /* Hide search on mobile to save space */
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .table-container {
+        padding: 20px;
+        border-radius: 16px;
+        overflow-x: auto;
+    }
+
+    .data-table {
+        min-width: 600px; /* Ensure table doesn't squeeze too much */
+    }
+
+    .nav-user-info {
+        display: none; /* Hide name/role on small phones */
+    }
+    
+    .nav-user {
+        padding-left: 12px;
+    }
+
+    .top-nav .nav-right {
+        gap: 12px;
+    }
+}
+
+/* Mobile Side Menu Styles */
+.mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    background: white;
+    z-index: 2000;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 30px 20px;
+}
+
+.mobile-sidebar.active {
+    left: 0;
+}
+
+.mobile-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1999;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.mobile-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.mobile-sidebar-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobile-sidebar-links a {
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 500;
+    padding: 14px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+}
+
+.mobile-sidebar-links a:hover,
+.mobile-sidebar-links a.active {
+    background: rgba(230, 49, 151, 0.08);
+    color: var(--primary);
+}
